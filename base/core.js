@@ -78,7 +78,7 @@ function initialize () {
     map.setMaxBounds ([[-90,-180],[90,180]])
     
     L.tileLayer(
-	"http://tile.openstreetmap.org/" + "/{z}/{x}/{y}",
+	"http://tile.openstreetmap.org/{z}/{x}/{y}.png",
 	{
 	    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
 	    maxZoom: 18,
@@ -113,6 +113,8 @@ function initialize () {
 	    }}).addTo (map)
 
     TrekMate.realtime = realtime
+
+    TrekMate.realtime.update ()
     
     map.on (
 	"click",
