@@ -32,8 +32,12 @@ function retrieveJson (url, callback, error) {
     retrieve (url, function (data) { callback (JSON.parse (data))}, error)
 }
 
-function retrieveConfiguration (map, callback) {
+function retrieveConfiguration (callback) {
     retrieveJson ("data/configuration.json", callback, noOp)
+}
+
+function retrieveLocations (callback) {
+    retrieveJson ("data/locations.geojson", callback, noOp)
 }
 
 var TrekMate = {
@@ -42,12 +46,7 @@ var TrekMate = {
 }
 
 function navigateTag (tag) {
-    if (TrekMate.tags.has (tag)) {
-	TrekMate.tags.delete (tag)
-    } else {
-	TrekMate.tags.add (tag)
-    }
-
+    TrekMate.tag = tag
     TrekMate.realtime.update ()
 }
 
@@ -55,10 +54,10 @@ function renderTags (tags) {
     var html = ""
     for (const tag of tags.sort ()) {
 	html += "<a href='javascript:navigateTag(\"" + tag + "\")'>"
-	if (TrekMate.tags.has (tag)) {
-	    html += tag + " [REMOVE]"
+	if (TrekMate.tag == tag) {
+	    html += tag + " [SELECTED]"
 	} else {
-	    html += tag + " [ADD]"
+	    html += tag
 	}
 	html += "</a><br>"
     }
@@ -86,17 +85,36 @@ function initialize () {
 	    noWrap: true
 	}).addTo(map)
 
+
+    retrieveConfiguration (function (configuration) {
+	map.setView (
+	    [configuration.latitude, configuration.longitude],
+	    configuration.zoom)
+    })
+
+    TrekMate.tag = "#world"
+    
     var realtime = L.realtime (
 	function (success, error) {
-	    fetchPostJson (
-		"data/locations.geojson",
-		Array.from (TrekMate.tags),
+	    retrieveLocations (
 		function (data) {
-		    renderTags (data.tags)
-		    success (data.locations)
-		},
-		function (data) {
-		    error ({}, "unable to fetch state")})},
+		    var tags = data.features.reduce (
+			(tags, feature) => {
+			    return feature.properties.tags.reduce (
+				(tags, tag) => {
+				    if (tag.startsWith ("#") || tag.startsWith ("@")) {
+					tags.add (tag)
+				    }
+				    return tags },
+				tags)},
+			new Set ())
+		   		    
+		    renderTags (Array.from (tags))
+		    data.features = data.features.filter (
+			feature => {
+			    return feature.properties.tags.filter(
+				tag => tag == TrekMate.tag).length > 0})
+		    success (data)})},
 	{
 	    // prevent auto refresh since data is huge
 	    start: false,
@@ -125,10 +143,4 @@ function initialize () {
 		" :tags #{}}")
 	}
     )
-
-    retrieveConfiguration (mapId, function (configuration) {
-	map.setView (
-	    [configuration.latitude, configuration.longitude],
-	    configuration.zoom)
-    })
 }
