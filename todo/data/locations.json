@@ -1,16 +1,27 @@
 {
-  "type": "FeatureCollection",
-  "features": [
     {
-      "type": "Feature",
-      "properties": {},
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          19.6875,
-          44.08758502824516
-        ]
-      }
+	"type": "FeatureCollection",
+	"features": [
+	    {
+		"type": "Feature",
+		"properties": {
+		    "tags":[
+			"#monument", 
+			"!Buzludzha", 
+			"Bulgaria", 
+			"|url|wikidata|https://www.wikidata.org/wiki/Q1058720",
+			"#wikidata"
+			"Q1058720"
+		    ]
+		},
+		"geometry": {
+		    "type": "Point",
+		    "coordinates": [
+			25.3938,
+			42.7358
+		    ]
+		}
+	    }
+	]
     }
-  ]
 }
